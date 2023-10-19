@@ -3,6 +3,7 @@ import datetime
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -36,7 +37,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         train_losses.append(loss.item())
         writer.add_scalar("Loss/train", epoch, loss.item())
         
-        pred = torch.argmax(loss)
+        pred = torch.argmax(F.softmax(loss, dim = 0))
         acc = (pred == labels).sum()
         train_accuracies.append(acc)
         writer.add_scalar("Accuracy/train", epoch, acc)
@@ -56,7 +57,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         val_losses.append(loss.item())
         writer.add_scalar("Loss/val", epoch, loss.item())
         
-        pred = torch.argmax(loss)
+        pred = torch.argmax(F.softmax(loss, dim = 0))
         acc = (pred == labels).sum()
         val_accuracies.append(acc)
         writer.add_scalar("Accuracy/val", epoch, acc)
@@ -80,7 +81,7 @@ def test(epoch, test_dataloader, writer):
         test_losses.append(loss.item())
         writer.add_scalar("Loss/test", epoch, loss.item())
         
-        pred = torch.argmax(loss)
+        pred = torch.argmax(F.softmax(loss, dim = 0))
         acc = (pred == labels).sum()
         test_accuracies.append(acc)
         writer.add_scalar("Accuracy/test", epoch, acc)

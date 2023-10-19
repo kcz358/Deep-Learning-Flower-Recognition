@@ -23,7 +23,7 @@ class ResNet50(BaseModel):
         self.transformation = transformation
     
     def forward(self, x):
-        return F.softmax(self.encoder(x))
+        return self.encoder(x)
     
     def to(self, device):
         self.encoder.to(device)
