@@ -39,7 +39,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         train_losses.append(loss.item())
         
         pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
-        acc = (pred == labels).sum()
+        acc = (pred == labels).sum() / len(labels)
         #import pdb; pdb.set_trace()
         train_accuracies.append(acc)
     
@@ -56,17 +56,17 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         val_losses.append(loss.item())
         
         pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
-        acc = (pred == labels).sum()
+        acc = (pred == labels).sum() / len(labels)
         val_accuracies.append(acc)
         
     train_losses = torch.tensor(train_losses, dtype=torch.float32)
     train_accuracies = torch.tensor(train_accuracies, dtype=torch.float32)
     val_losses = torch.tensor(val_losses, dtype=torch.float32)
     val_accuracies = torch.tensor(val_accuracies, dtype=torch.float32)
-    writer.add_scalar("Loss/train", epoch, train_losses.mean())
-    writer.add_scalar("Accuracy/train", epoch, train_accuracies.mean())
-    writer.add_scalar("Loss/val", epoch, val_losses.mean())
-    writer.add_scalar("Accuracy/val", epoch, val_accuracies.mean())
+    writer.add_scalar("Loss/train", train_losses.mean(), epoch)
+    writer.add_scalar("Accuracy/train", train_accuracies.mean(), epoch)
+    writer.add_scalar("Loss/val", val_losses.mean(), epoch)
+    writer.add_scalar("Accuracy/val", val_accuracies.mean(), epoch)
     return train_losses.mean(), train_accuracies.mean(), val_losses.mean(), val_accuracies.mean()
 
 def test(epoch, test_dataloader, writer):
@@ -83,13 +83,13 @@ def test(epoch, test_dataloader, writer):
         test_losses.append(loss.item())
         
         pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
-        acc = (pred == labels).sum()
+        acc = (pred == labels).sum() / len(labels)
         test_accuracies.append(acc)
     
     test_losses = torch.tensor(test_losses, dtype=torch.float32)
     test_accuracies = torch.tensor(test_accuracies, dtype=torch.float32)
-    writer.add_scalar("Loss/test", epoch, test_losses.mean())
-    writer.add_scalar("Accuracy/test", epoch, test_accuracies.mean())
+    writer.add_scalar("Loss/test",test_losses.mean(), epoch)
+    writer.add_scalar("Accuracy/test", test_accuracies.mean(), epoch)
     
     return test_losses.mean(), test_accuracies.mean()
         
@@ -128,13 +128,13 @@ if __name__ == '__main__':
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
         
         if(epoch % 5 == 0):
-            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies}, Test Acc {test_accuracies}")
+            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
             state_dict = {
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
                 'Val Acc' : val_accuracies,
                 'Test Acc' : test_accuracies
             }
-            torch.save(state_dict, args.model_saving_path)
+            torch.save(state_dict, args.model_saving_path + f"/{epoch}_{model.name}.pth.tar")
     
     writer.close()
