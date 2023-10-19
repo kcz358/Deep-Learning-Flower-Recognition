@@ -38,8 +38,9 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         optimizer.step()
         train_losses.append(loss.item())
         
-        pred = torch.argmax(F.softmax(loss, dim = 0))
+        pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
         acc = (pred == labels).sum()
+        #import pdb; pdb.set_trace()
         train_accuracies.append(acc)
     
     model.eval()
@@ -54,7 +55,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         
         val_losses.append(loss.item())
         
-        pred = torch.argmax(F.softmax(loss, dim = 0))
+        pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
         acc = (pred == labels).sum()
         val_accuracies.append(acc)
         
@@ -80,14 +81,14 @@ def test(epoch, test_dataloader, writer):
         loss = criterion(output, labels)
         
         test_losses.append(loss.item())
-        writer.add_scalar("Loss/test", epoch, loss.item())
         
-        pred = torch.argmax(F.softmax(loss, dim = 0))
+        pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
         acc = (pred == labels).sum()
         test_accuracies.append(acc)
     
     test_losses = torch.tensor(test_losses, dtype=torch.float32)
     test_accuracies = torch.tensor(test_accuracies, dtype=torch.float32)
+    writer.add_scalar("Loss/test", epoch, test_losses.mean())
     writer.add_scalar("Accuracy/test", epoch, test_accuracies.mean())
     
     return test_losses.mean(), test_accuracies.mean()
