@@ -32,13 +32,14 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
+        output = F.softmax(output, dim = 0)
         loss = criterion(output, labels)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         train_losses.append(loss.item())
         
-        pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
+        pred = torch.argmax(output, dim=1)
         acc = (pred == labels).sum() / len(labels)
         #import pdb; pdb.set_trace()
         train_accuracies.append(acc)
@@ -51,11 +52,12 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
+        output = F.softmax(output, dim = 0)
         loss = criterion(output, labels)
         
         val_losses.append(loss.item())
         
-        pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
+        pred = torch.argmax(output, dim=1)
         acc = (pred == labels).sum() / len(labels)
         val_accuracies.append(acc)
         
@@ -78,11 +80,12 @@ def test(epoch, test_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
+        output = F.softmax(output, dim = 0)
         loss = criterion(output, labels)
         
         test_losses.append(loss.item())
         
-        pred = torch.argmax(F.softmax(output, dim = 0), dim=1)
+        pred = torch.argmax(output, dim=1)
         acc = (pred == labels).sum() / len(labels)
         test_accuracies.append(acc)
     
