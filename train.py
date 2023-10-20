@@ -32,7 +32,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
-        output = F.softmax(output, dim = 0)
+        output = F.softmax(output, dim = 1)
         loss = criterion(output, labels)
         optimizer.zero_grad()
         loss.backward()
@@ -52,7 +52,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
-        output = F.softmax(output, dim = 0)
+        output = F.softmax(output, dim = 1)
         loss = criterion(output, labels)
         
         val_losses.append(loss.item())
@@ -80,7 +80,7 @@ def test(epoch, test_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
-        output = F.softmax(output, dim = 0)
+        output = F.softmax(output, dim = 1)
         loss = criterion(output, labels)
         
         test_losses.append(loss.item())
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     val_dataset.transform = model.transformation
     test_dataset.transform = model.transformation
     
-    optimizer = Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
     
     train_dataloader = DataLoader(train_dataset, batch_size=64)
     val_dataloader = DataLoader(val_dataset, batch_size=64)
