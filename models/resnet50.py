@@ -1,3 +1,5 @@
+from typing import Iterator
+from torch.nn.parameter import Parameter
 from torchvision import transforms, models
 import torch.nn as nn
 import torch.nn.functional as F
@@ -27,3 +29,6 @@ class ResNet50(BaseModel):
     
     def to(self, device):
         self.encoder.to(device)
+    
+    def parameters(self, recurse: bool = True) -> Iterator[Parameter]:
+        return self.encoder.parameters(recurse)
