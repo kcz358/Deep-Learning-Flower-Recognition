@@ -19,7 +19,7 @@ class Flowers102(BaseDataset):
         self.labels = loadmat(self.dataset_path + "/imagelabels.mat")['labels']
         # Squeeze to 1-D shape
         self.labels = torch.tensor(self.labels.astype(int)).squeeze(0)
-        self.num_classes = 102
+        self.num_classes = self.labels.max()
         
         if split == 'train':
             self.idx = loadmat(self.dataset_path + "/setid.mat")['trnid']
@@ -30,16 +30,23 @@ class Flowers102(BaseDataset):
             
         # Squeeze to (len) shape
         self.idx = torch.tensor(self.idx.astype(int)).squeeze(0)
+        self.idx = torch.sort(self.idx).values
         self.images = glob(self.dataset_path + "/jpg" + "/*.jpg")
         self.transform = transform
         
     def __getitem__(self, index):
-        label = self.labels[index]
-        image = Image.open(self.images[index])
+        # Map the correct index to train and test index
+        # Again the id is from 1 - 8189
+        # We want 0 - 8188, so we minus 1
+        idx = self.idx[index].item() - 1
+        label = self.labels[idx]
+        image = Image.open(self.images[idx])
         if self.transform is not None:
             image = self.transform(image)
         
-        return image, label
+        # We want label to be from 0 - 101
+        # The range of the label in the mat file is 1 - 102
+        return image, label - 1
             
     def __len__(self):
         return len(self.idx)
