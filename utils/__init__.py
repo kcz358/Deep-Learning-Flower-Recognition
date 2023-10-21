@@ -1,0 +1,1 @@
+from .setup import build_from_config

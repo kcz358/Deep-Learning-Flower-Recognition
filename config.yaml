@@ -1,0 +1,22 @@
+model :
+  - model_name: resnet50 
+    num_classes : 102
+    weights : DEFAULT
+
+dataset : 
+  - dataset_name : flowers102
+    dataset_path : ./flowers_102
+
+optimizer :
+  - opt_name : adam
+    lr : 0.0005
+    warmup : 650
+  
+loss : 
+  - loss_name : crossentropy
+
+scheduler :
+  - scheduler_name : steplr
+    gamma : 0.9
+    step_size : 2
+

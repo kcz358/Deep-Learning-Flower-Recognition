@@ -9,8 +9,8 @@ from PIL import Image
 from .base_dataset import BaseDataset
 
 class Flowers102(BaseDataset):
-    def __init__(self, dataset_path : str, split : str = 'train', transform = None) -> None:
-        super().__init__("flower102")
+    def __init__(self, dataset_name : str, dataset_path : str, split : str = 'train', transform = None) -> None:
+        super().__init__(dataset_name)
         self.dataset_path = dataset_path
         assert os.path.exists(dataset_path + "/jpg"), "No jpg (image) files in the folder"
         assert os.path.exists(dataset_path + "/imagelabels.mat"), "No label files in the folder"
