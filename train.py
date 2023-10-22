@@ -14,8 +14,8 @@ from datasets import flowers102
 from models import resnet50
 from utils import build_from_config
 
-import warnings
-warnings.filterwarnings('ignore')
+#import warnings
+#warnings.filterwarnings('ignore')
 EPOCHS = 5
 
 def parse_arguments():
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     model.to(device)
 
-    optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
+    #optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
     
     train_dataloader = DataLoader(train_dataset, batch_size=64)
     val_dataloader = DataLoader(valid_dataset, batch_size=64)

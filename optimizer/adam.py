@@ -27,8 +27,8 @@ class AdamOpt(BaseOptimizer):
         self.__dict__.update(state_dict) 
     
     def step(self):
-        if(self.step < self.warmup):
-            lr_scale = min(1., float(self.step + 1) / self.warmup)
+        if(self._step < self.warmup):
+            lr_scale = min(1., float(self._step + 1) / self.warmup)
             for pg in self.optimizer.param_groups:
                 pg['lr'] = lr_scale * self.lr
         
