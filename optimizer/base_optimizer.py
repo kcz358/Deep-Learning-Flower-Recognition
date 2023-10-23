@@ -30,7 +30,7 @@ class BaseOptimizer(ABC):
     
     
 def load_optimizer(optimizer_name: str, optimizer_args: Dict[str, str]) -> BaseOptimizer:
-        assert optimizer_name in AVAILABLE_OPTIMIZER, f"{optimizer_name} is not an available model."
+        assert optimizer_name in AVAILABLE_OPTIMIZER, f"{optimizer_name} is not an available optimizer."
         module_path = f"optimizer.{optimizer_name}"
         imported_module = importlib.import_module(module_path)
         optimizer_formal_name = AVAILABLE_OPTIMIZER[optimizer_name]

@@ -19,7 +19,7 @@ class BaseDataset(Dataset):
         pass
 
 def load_dataset(dataset_name: str, dataset_args: Dict[str, str]) -> BaseDataset:
-        assert dataset_name in AVAILABLE_DATASETS, f"{dataset_name} is not an available model."
+        assert dataset_name in AVAILABLE_DATASETS, f"{dataset_name} is not an available dataset."
         module_path = f"datasets.{dataset_name}"
         imported_module = importlib.import_module(module_path)
         dataset_formal_name = AVAILABLE_DATASETS[dataset_name]

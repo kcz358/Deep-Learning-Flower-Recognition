@@ -1,5 +1,5 @@
 model :
-  - model_name: resnet50 
+  - model_name: ViT 
     num_classes : 102
     weights : DEFAULT
 

@@ -12,7 +12,7 @@ class BaseLoss(nn.Module):
         self.name = loss_name
     
 def load_loss(loss_name: str, loss_args: Dict[str, str]) -> BaseLoss:
-        assert loss_name in AVAILABLE_LOSS, f"{loss_name} is not an available model."
+        assert loss_name in AVAILABLE_LOSS, f"{loss_name} is not an available loss function."
         module_path = f"loss.{loss_name}"
         imported_module = importlib.import_module(module_path)
         loss_formal_name = AVAILABLE_LOSS[loss_name]

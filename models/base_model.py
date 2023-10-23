@@ -3,7 +3,8 @@ import importlib
 
 import torch.nn as nn
 AVAILABLE_MODELS = {
-    'resnet50' : 'ResNet50'
+    'resnet50' : 'ResNet50',
+    'vit': 'ViT'
 }
 
 class BaseModel(nn.Module):

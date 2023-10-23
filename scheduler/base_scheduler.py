@@ -33,7 +33,7 @@ class BaseScheduler(ABC):
     
     
 def load_scheduler(scheduler_name: str, scheduler_args: Dict[str, str]) -> BaseScheduler:
-        assert scheduler_name in AVAILABLE_SCHEDULER, f"{scheduler_name} is not an available model."
+        assert scheduler_name in AVAILABLE_SCHEDULER, f"{scheduler_name} is not an available scheduler."
         module_path = f"scheduler.{scheduler_name}"
         imported_module = importlib.import_module(module_path)
         scheduler_formal_name = AVAILABLE_SCHEDULER[scheduler_name]

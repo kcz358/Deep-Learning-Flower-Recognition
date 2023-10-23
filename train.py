@@ -24,7 +24,7 @@ def parse_arguments():
     # Add arguments
     parser.add_argument('--model_saving_path', required=True, help='Path to save the model')
     parser.add_argument('--tensorboard_log_path', required=True, help='Path to save TensorBoard logs')
-    parser.add_argument("--config", "-c", type=str, help="Path to the config file.")
+    parser.add_argument("--config", "-c", required=True, type=str, help="Path to the config file.")
 
     return parser.parse_args()   
 
