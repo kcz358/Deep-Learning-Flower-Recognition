@@ -1,5 +1,5 @@
 model :
-  - model_name: ViT 
+  - model_name: vit 
     num_classes : 102
     weights : DEFAULT
 
