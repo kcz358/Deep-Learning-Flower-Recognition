@@ -10,8 +10,6 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 
-from datasets import flowers102
-from models import resnet50
 from utils import build_from_config
 
 #import warnings
@@ -103,7 +101,8 @@ def test(epoch, test_dataloader, writer):
     
     return test_losses.mean(), test_accuracies.mean()
         
-        
+def is_best(best_acc, test_acc):
+    return best_acc < test_acc
     
 
 if __name__ == '__main__':
@@ -127,18 +126,23 @@ if __name__ == '__main__':
     formatted_time = current_time.strftime("%Y-%m-%d-%H:%M:%S").replace("-", "_").replace(":", "-")
     writer = SummaryWriter(log_dir=args.tensorboard_log_path + "/{}_{}_{}".format(model.name, train_dataset.name, formatted_time))
     
+    best_acc = 0
     for epoch in range(1,EPOCHS+1):
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
         
-        if(epoch % 5 == 0):
-            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
-            state_dict = {
+        state_dict = {
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
                 'Val Acc' : val_accuracies,
                 'Test Acc' : test_accuracies
             }
+        
+        if(epoch % 5 == 0):
+            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
             torch.save(state_dict, args.model_saving_path + f"/{epoch}_{model.name}.pth.tar")
+        
+        if(is_best(best_acc, test_accuracies)):
+            torch.save(state_dict, args.model_saving_path + "/model_best.pth.tar")
     
     writer.close()
