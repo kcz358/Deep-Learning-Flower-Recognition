@@ -18,5 +18,5 @@ loss :
 scheduler :
   - scheduler_name : steplr
     gamma : 0.9
-    step_size : 2
+    step_size : 10
 
