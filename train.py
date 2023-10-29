@@ -34,14 +34,14 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
-        output = F.softmax(output, dim = 1)
+        #output[0] = F.softmax(output[0], dim = 1)
         loss = criterion(output, labels)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         train_losses.append(loss.item())
         
-        pred = torch.argmax(output, dim=1)
+        pred = torch.argmax(output[0], dim=1)
         acc = (pred == labels).sum() / len(labels)
         #import pdb; pdb.set_trace()
         train_accuracies.append(acc)
@@ -57,12 +57,12 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
-        output = F.softmax(output, dim = 1)
+        #output[0] = F.softmax(output[0], dim = 1)
         loss = criterion(output, labels)
         
         val_losses.append(loss.item())
         
-        pred = torch.argmax(output, dim=1)
+        pred = torch.argmax(output[0], dim=1)
         acc = (pred == labels).sum() / len(labels)
         val_accuracies.append(acc)
         
@@ -87,12 +87,12 @@ def test(epoch, test_dataloader, writer):
         labels = labels.to(device)
         
         output = model(images)
-        output = F.softmax(output, dim = 1)
+        #output[0] = F.softmax(output[0], dim = 1)
         loss = criterion(output, labels)
         
         test_losses.append(loss.item())
         
-        pred = torch.argmax(output, dim=1)
+        pred = torch.argmax(output[0], dim=1)
         acc = (pred == labels).sum() / len(labels)
         test_accuracies.append(acc)
     
@@ -132,6 +132,12 @@ if __name__ == '__main__':
     
     best_acc = 0
     not_improved = 0
+    
+    continue_ckpt = config['training'][0].get('continue_ckpt', None)
+    if continue_ckpt is not None:
+        ckpt = torch.load(continue_ckpt)
+        model.load_state_dict(ckpt['state_dict'])
+        
     for epoch in range(1,EPOCHS+1):
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)

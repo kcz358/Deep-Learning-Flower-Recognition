@@ -22,4 +22,7 @@ class CrossEntropy(BaseLoss):
         )
     
     def forward(self, output, labels):
-        return self.criterion(output, labels)
+        # Contains encoding features
+        # (logits, encoding features), will be None encoding features 
+        # if feature extraction for resnet if false
+        return self.criterion(output[0], labels)

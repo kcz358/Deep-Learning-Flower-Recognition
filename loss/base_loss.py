@@ -3,7 +3,11 @@ import importlib
 
 import torch.nn as nn
 AVAILABLE_LOSS = {
-    'crossentropy' : 'CrossEntropy'
+    'crossentropy' : 'CrossEntropy',
+    'triplet2heads' : 'Triplet2Heads',
+    'tripletloss' : 'TripletLoss',
+    'multisimilarityloss' : 'MultiSimilarityLoss',
+    'multisimilarity2heads' : 'Multisimilarity2Heads'
 }
 
 class BaseLoss(nn.Module):
