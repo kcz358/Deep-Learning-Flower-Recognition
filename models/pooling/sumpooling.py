@@ -1,9 +1,11 @@
 import torch.nn as nn
 
-class AdaptiveSumPool2d(nn.Module):
-    def __init__(self) -> None:
-        super().__init__()
-        self.pooling = nn.AdaptiveMaxPool2d(output_size=(1,1))
+from .base_pooling import BasePooling
+
+class AdaptiveSumPool2d(BasePooling):
+    def __init__(self, pooling_name: str) -> None:
+        super().__init__(pooling_name)
+        self.pooling = nn.AdaptiveAvgPool2d(output_size=(1,1))
     
     def forward(self, x):
         mu = x.mean()

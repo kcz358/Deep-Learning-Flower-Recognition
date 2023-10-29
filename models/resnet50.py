@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .base_model import BaseModel
-from pooling.base_pooling import load_pooling
+from .pooling.base_pooling import load_pooling
 
 default_transformation = transforms.Compose([
     transforms.Resize(256),
@@ -46,9 +46,9 @@ class ResNet50(BaseModel):
             for p in l.parameters():
                 p.requires_grad = False
         
-        pooling_args = {'output_size' : (1,1)}
+
         self.encoder = nn.Sequential(*layers)
-        self.pooling = load_pooling(pool_name=pooling, pooling_args=pooling_args)
+        self.pooling = load_pooling(pool_name=pooling)
         self.cls_head = nn.Sequential(
             nn.Linear(model.fc.in_features, num_classes),
             nn.Softmax(dim = 1)
