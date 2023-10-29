@@ -1,7 +1,8 @@
 model :
-  - model_name: vit 
+  - model_name: resnet50 
     num_classes : 102
     weights : DEFAULT
+    transformation : resnet50_standard_augmentation
 
 dataset : 
   - dataset_name : flowers102
@@ -20,3 +21,6 @@ scheduler :
     gamma : 0.9
     step_size : 10
 
+training :
+  - patience : 10
+    epochs : 50
