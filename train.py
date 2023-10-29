@@ -14,7 +14,6 @@ from utils import build_from_config
 
 #import warnings
 #warnings.filterwarnings('ignore')
-EPOCHS = 5
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="A script that takes dataset path, model saving path, and tensorboard log path as arguments.")
@@ -46,6 +45,9 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         acc = (pred == labels).sum() / len(labels)
         #import pdb; pdb.set_trace()
         train_accuracies.append(acc)
+        
+        if(iterations % 100 == 0):
+            print(f"Batch [{iterations}/{len(train_dataloader)}] : Training Loss {sum(train_losses) / len(train_losses)}, Training Acc {sum(train_accuracies) / len(train_accuracies)}")
     
     model.eval()
     val_losses = []
@@ -111,6 +113,8 @@ if __name__ == '__main__':
     
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
+    EPOCHS = config['training'][0]['epochs']
+    patience = config['training'][0]['patience']
     
     model, optimizer, scheduler, criterion, train_dataset, valid_dataset, test_dataset = build_from_config(config)
 
@@ -127,6 +131,7 @@ if __name__ == '__main__':
     writer = SummaryWriter(log_dir=args.tensorboard_log_path + "/{}_{}_{}".format(model.name, train_dataset.name, formatted_time))
     
     best_acc = 0
+    not_improved = 0
     for epoch in range(1,EPOCHS+1):
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
@@ -140,9 +145,17 @@ if __name__ == '__main__':
         
         if(epoch % 5 == 0):
             print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
-            torch.save(state_dict, args.model_saving_path + f"/{epoch}_{model.name}.pth.tar")
+            torch.save(state_dict, args.model_saving_path + f"/latest_{model.name}.pth.tar")
         
         if(is_best(best_acc, test_accuracies)):
+            best_acc = test_accuracies
             torch.save(state_dict, args.model_saving_path + "/model_best.pth.tar")
+            not_improved = 0
+        else:
+            not_improved += 1
+            
+        if(not_improved > patience):
+            print(f"Testing results not improving for {patience} Epochs, Stop training")
+            break
     
     writer.close()
