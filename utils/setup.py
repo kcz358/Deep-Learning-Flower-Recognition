@@ -17,7 +17,8 @@ def build_from_config(config):
         model_config['transformation'] = transformation
     except:
         print("No transformation specified, use default one")
-        model_config.pop('transformation')
+        if 'transformation' in model_config:
+            model_config.pop('transformation')
     model = build_model_from_config(model_config)
     optimizer_config['param_groups'] = model.parameters()
     optimizer = build_optimizer_from_config(optimizer_config)
