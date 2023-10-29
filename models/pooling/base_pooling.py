@@ -17,11 +17,11 @@ class BasePooling(nn.Module):
     def forward(self, x):
         pass
     
-def load_pooling(pool_name: str, pooling_args: Dict[str, str]) -> BasePooling:
+def load_pooling(pool_name: str) -> BasePooling:
         assert pool_name in AVAILABLE_POOLING, f"{pool_name} is not an available model."
-        module_path = f"models.{pool_name}"
+        module_path = f"models.pooling.{pool_name}"
         imported_module = importlib.import_module(module_path)
         pool_formal_name = AVAILABLE_POOLING[pool_name]
         model_class = getattr(imported_module, pool_formal_name)
         print(f"Imported class: {model_class}")
-        return model_class(**pooling_args)
+        return model_class(pool_name)
