@@ -73,7 +73,7 @@ def test(epoch, test_dataset, train_dataset, writer):
         writer.add_scalar('Val/Recall@' + str(i), n, epoch)
     return recalls
         
-def is_best_recall(recalls, best_score):
+def is_best_recall(best_score, recalls):
     if recalls[1] > best_score[1]:
         return True
     elif recalls[1] < best_score[1]:
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     for epoch in range(1,EPOCHS+1):
         if(epoch == 1):
             print("Off the shelf model")
-            test(0, test_dataset, train_dataset, writer)
+            test_recalls = test(0, test_dataset, train_dataset, writer)
             state_dict = {
                 'epoch' : 0,
                 'state_dict' : model.state_dict(),
