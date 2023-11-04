@@ -1,6 +1,7 @@
 from glob import glob
 import os
 
+import numpy as np
 from scipy.io import loadmat
 import torch
 from torchvision import transforms
@@ -9,7 +10,12 @@ from PIL import Image
 from .base_dataset import BaseDataset
 
 class Flowers102(BaseDataset):
-    def __init__(self, dataset_name : str, dataset_path : str, split : str = 'train', transform = None) -> None:
+    def __init__(self, 
+                 dataset_name : str, 
+                 dataset_path : str, 
+                 split : str = 'train', 
+                 transform = None,
+                 n_shot : int = -1) -> None:
         super().__init__(dataset_name)
         self.dataset_path = dataset_path
         print(f"Debug: dataset_path = {dataset_path}")
@@ -32,6 +38,11 @@ class Flowers102(BaseDataset):
         # Squeeze to (len) shape
         self.idx = torch.tensor(self.idx.astype(int)).squeeze(0)
         self.idx = torch.sort(self.idx).values
+        
+        if n_shot != -1:
+            print(f"Sampled {n_shot}-shot samples from each of the classes")
+            
+            
         self.images = glob(self.dataset_path + "/jpg" + "/*.jpg")
         self.transform = transform
         
