@@ -131,6 +131,7 @@ if __name__ == '__main__':
                 'epoch' : 0,
                 'state_dict' : model.state_dict(),
                 'Recalls' : test_recalls,
+                'config' : config
             }
             
             torch.save(state_dict, args.model_saving_path + f"/model_best.pth.tar")
@@ -143,6 +144,7 @@ if __name__ == '__main__':
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
                 'Recalls' : test_recalls,
+                'config' : config
             }
         
         if(epoch % 5 == 0):
