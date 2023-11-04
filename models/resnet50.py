@@ -40,20 +40,19 @@ class ResNet50(BaseModel):
         super().__init__(model_name)
         assert tuned.lower() in tuned_option, "Specify the portion you want to tuned. Available option [full, low, mid, high, linear_head]"
         model = models.resnet50(weights = weights)
-        layers = list(model.children())[:-2]
+        layers = list(model.named_children())[:-2]
         self.off_layers = tuned_option[tuned.lower()]
-        for l in layers[:self.off_layers]:
-            for p in l.parameters():
-                p.requires_grad = False
-        
+        for idx, (name, l) in enumerate(layers):
+            if idx < self.off_layers:
+                print(f"Turning off {name}")
+                for p in l.parameters():
+                    p.requires_grad = False
+            layers[idx] = l
+            
+
 
         self.encoder = nn.Sequential(*layers)
         self.pooling = load_pooling(pool_name=pooling)
-        self.embedding_head = nn.Sequential(
-            nn.Linear(2048, 1024),
-            nn.ReLU(),
-            nn.Linear(1024,2048)
-        )
         self.embedding_size = 2048
         self.cls_head = nn.Sequential(
             nn.Linear(model.fc.in_features, num_classes),
@@ -68,17 +67,15 @@ class ResNet50(BaseModel):
         features = self.encoder(x)
         # (B, 2048, 7, 7) --> (B, 2048, 1, 1) --> (B, 2048)
         features = self.pooling(features).flatten(1)
-        embedding = self.embedding_head(features)
         output = self.cls_head(features)
         if self.feature_extraction:
-            return output, embedding
+            return output, features
         else:      
             return output, None
     
     def to(self, device):
         self.encoder.to(device)
         self.cls_head.to(device)
-        self.embedding_head.to(device)
         # Gem is a trainable pooling layer
         if self.pooling.name != 'avgpooling' or self.pooling.name != 'sumpooling':
             self.pooling.to(device)
@@ -87,9 +84,7 @@ class ResNet50(BaseModel):
         if self.pooling.name != 'avgpooling' or self.pooling.name != 'sumpooling':
             return itertools.chain(self.encoder.parameters(recurse), 
                                self.cls_head.parameters(recurse),
-                               self.pooling.parameters(recurse),
-                               self.embedding_head.parameters(recurse))
+                               self.pooling.parameters(recurse))
 
         return itertools.chain(self.encoder.parameters(recurse), 
-                               self.cls_head.parameters(recurse),
-                               self.embedding_head.parameters(recurse))
+                               self.cls_head.parameters(recurse))

@@ -36,9 +36,14 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         output = model(images)
         #output[0] = F.softmax(output[0], dim = 1)
         loss = criterion(output, labels)
-        optimizer.zero_grad()
         loss.backward()
-        optimizer.step()
+        # For sam
+        def closure():
+            loss = criterion(model(images), labels)
+            loss.backward()
+            return loss
+        optimizer.step(closure)
+        optimizer.zero_grad()
         train_losses.append(loss.item())
         
         pred = torch.argmax(output[0], dim=1)
@@ -146,7 +151,8 @@ if __name__ == '__main__':
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
                 'Val Acc' : val_accuracies,
-                'Test Acc' : test_accuracies
+                'Test Acc' : test_accuracies,
+                'training_config' : config
             }
         
         if(epoch % 5 == 0):

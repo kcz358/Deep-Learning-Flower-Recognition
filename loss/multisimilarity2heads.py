@@ -8,16 +8,12 @@ class Multisimilarity2Heads(BaseLoss):
     def __init__(self, 
                  loss_name: str,
                  offline : bool = False,
-                 margin : float = 0.05,
-                 swap : bool = False,
-                 smooth_loss : bool = False,
-                 triplets_per_anchor = 'all'):
+                 alpha=2, 
+                 beta=50, 
+                 base=0.5):
         super().__init__(loss_name)
         
-        self.triplet_loss = losses.MultipleLosses(margin=margin, 
-                                                     swap = swap, 
-                                                     smooth_loss=smooth_loss, 
-                                                     triplets_per_anchor=triplets_per_anchor)
+        self.ms_loss = losses.MultipleLosses(alpha=alpha, beta=beta,base=base)
         
         self.cross_entropy = CrossEntropyLoss()
         
@@ -29,5 +25,5 @@ class Multisimilarity2Heads(BaseLoss):
         # Scale the loss
         cls_loss = self.cross_entropy(output[0], labels) / 10
         hard_pairs = self.miner(output[1], labels)
-        triplet_loss = self.triplet_loss(output[1], labels, hard_pairs)
-        return cls_loss + triplet_loss
+        ms_loss = self.ms_loss(output[1], labels, hard_pairs)
+        return cls_loss + ms_loss
