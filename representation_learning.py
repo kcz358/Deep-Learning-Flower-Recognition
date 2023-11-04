@@ -2,6 +2,7 @@ import argparse
 import datetime
 import yaml
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,8 +11,8 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 
-from utils import build_from_config
-from utils.earlystop import EarlyStopper
+from utils import build_from_config, encode_database, evaluate
+
 #import warnings
 #warnings.filterwarnings('ignore')
 
@@ -28,7 +29,6 @@ def parse_arguments():
 def train(epoch, train_dataloader, val_dataloader, writer):
     model.train()
     train_losses = []
-    train_accuracies = []
     for iterations, (images, labels) in enumerate(train_dataloader, 1):
         images = images.to(device)
         labels = labels.to(device)
@@ -36,80 +36,55 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         output = model(images)
         #output[0] = F.softmax(output[0], dim = 1)
         loss = criterion(output, labels)
-        loss.backward()
-        # For sam
-        def closure():
-            loss = criterion(model(images), labels)
-            loss.backward()
-            return loss
-        optimizer.step(closure)
         optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
         train_losses.append(loss.item())
         
-        pred = torch.argmax(output[0], dim=1)
-        acc = (pred == labels).sum() / len(labels)
-        #import pdb; pdb.set_trace()
-        train_accuracies.append(acc)
-        
         if(iterations % 100 == 0):
-            print(f"Batch [{iterations}/{len(train_dataloader)}] : Training Loss {sum(train_losses) / len(train_losses)}, Training Acc {sum(train_accuracies) / len(train_accuracies)}")
+            print(f"Batch [{iterations}/{len(train_dataloader)}] : Training Loss {sum(train_losses) / len(train_losses)}")
     
-    model.eval()
-    val_losses = []
-    val_accuracies = []
-    for iterations, (images, labels) in enumerate(val_dataloader, 1):
-        images = images.to(device)
-        labels = labels.to(device)
-        
-        output = model(images)
-        #output[0] = F.softmax(output[0], dim = 1)
-        loss = criterion(output, labels)
-        
-        val_losses.append(loss.item())
-        
-        pred = torch.argmax(output[0], dim=1)
-        acc = (pred == labels).sum() / len(labels)
-        val_accuracies.append(acc)
         
     train_losses = torch.tensor(train_losses, dtype=torch.float32)
-    train_accuracies = torch.tensor(train_accuracies, dtype=torch.float32)
-    val_losses = torch.tensor(val_losses, dtype=torch.float32)
-    val_accuracies = torch.tensor(val_accuracies, dtype=torch.float32)
+
     writer.add_scalar("Loss/train", train_losses.mean(), epoch)
-    writer.add_scalar("Accuracy/train", train_accuracies.mean(), epoch)
-    writer.add_scalar("Loss/val", val_losses.mean(), epoch)
-    writer.add_scalar("Accuracy/val", val_accuracies.mean(), epoch)
     
     scheduler.step()
-    return train_losses.mean(), train_accuracies.mean(), val_losses.mean(), val_accuracies.mean()
+    return train_losses.mean()
 
-def test(epoch, test_dataloader, writer):
-    model.eval()
-    test_losses = []
-    test_accuracies = []
-    for iterations, (images, labels) in enumerate(test_dataloader, 1):
-        images = images.to(device)
-        labels = labels.to(device)
-        
-        output = model(images)
-        #output[0] = F.softmax(output[0], dim = 1)
-        loss = criterion(output, labels)
-        
-        test_losses.append(loss.item())
-        
-        pred = torch.argmax(output[0], dim=1)
-        acc = (pred == labels).sum() / len(labels)
-        test_accuracies.append(acc)
+def test(epoch, test_dataset, train_dataset, writer):
+    db_features = encode_database(train_dataset, model, model.embedding_size, device)
+    q_features = encode_database(test_dataset, model, model.embedding_size, device)
     
-    test_losses = torch.tensor(test_losses, dtype=torch.float32)
-    test_accuracies = torch.tensor(test_accuracies, dtype=torch.float32)
-    writer.add_scalar("Loss/test",test_losses.mean(), epoch)
-    writer.add_scalar("Accuracy/test", test_accuracies.mean(), epoch)
+    db_labels = []
+    for idx in range(len(train_dataset)):
+        db_labels.append(train_dataset[idx][1])
+    db_labels = np.array(db_labels, dtype=int)
+    q_labels = []
+    for idx in range(len(test_dataset)):
+        q_labels.append(test_dataset[idx][1])
+    q_labels = np.array(q_labels, dtype=int)
     
-    return test_losses.mean(), test_accuracies.mean()
+    # recalls a dict (k, recall@k)
+    recalls = evaluate(db_features, q_features, db_labels, q_labels)
+    
+    for i,n in recalls.items():
+        #print("====> Recall@{}: {:.4f}".format(i, n))     
+        writer.add_scalar('Val/Recall@' + str(i), n, epoch)
+    return recalls
         
-def is_best(best_acc, test_acc):
-    return best_acc < test_acc
+def is_best_recall(best_score, recalls):
+    if recalls[1] > best_score[1]:
+        return True
+    elif recalls[1] < best_score[1]:
+        return False
+    else:
+        if recalls[5] > best_score[5]:
+            return True
+        elif recalls[5] < best_score[5]:
+            return False
+        else:
+            return recalls[10] > best_score[10]
     
 
 if __name__ == '__main__':
@@ -135,32 +110,48 @@ if __name__ == '__main__':
     formatted_time = current_time.strftime("%Y-%m-%d-%H:%M:%S").replace("-", "_").replace(":", "-")
     writer = SummaryWriter(log_dir=args.tensorboard_log_path + "/{}_{}_{}".format(model.name, train_dataset.name, formatted_time))
     
-    best_acc = 0
+    best_acc = {
+        1 : 0,
+        5 : 0,
+        10 : 0,
+        20 : 0
+    }
     not_improved = 0
     
     continue_ckpt = config['training'][0].get('continue_ckpt', None)
     if continue_ckpt is not None:
         ckpt = torch.load(continue_ckpt)
-        model.load_state_dict(ckpt['state_dict'])
+        model.load_state_dict(ckpt['state_dict'], strict=False)
         
     for epoch in range(1,EPOCHS+1):
-        train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
-        test_losses, test_accuracies = test(epoch, test_dataloader, writer)
+        if(epoch == 1):
+            print("Off the shelf model")
+            test_recalls = test(0, test_dataset, train_dataset, writer)
+            state_dict = {
+                'epoch' : 0,
+                'state_dict' : model.state_dict(),
+                'Recalls' : test_recalls,
+                'config' : config
+            }
+            
+            torch.save(state_dict, args.model_saving_path + f"/model_best.pth.tar")
+            
+        print(f"Epoch {epoch} ===>")
+        train_losses = train(epoch, train_dataloader, val_dataloader, writer)
+        test_recalls = test(epoch, test_dataset, train_dataset, writer)
         
         state_dict = {
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
-                'Val Acc' : val_accuracies,
-                'Test Acc' : test_accuracies,
-                'training_config' : config
+                'Recalls' : test_recalls,
+                'config' : config
             }
         
         if(epoch % 5 == 0):
-            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
             torch.save(state_dict, args.model_saving_path + f"/latest_{model.name}.pth.tar")
         
-        if(is_best(best_acc, test_accuracies)):
-            best_acc = test_accuracies
+        if(is_best_recall(best_acc, test_recalls)):
+            best_acc = test_recalls
             torch.save(state_dict, args.model_saving_path + "/model_best.pth.tar")
             not_improved = 0
         else:
