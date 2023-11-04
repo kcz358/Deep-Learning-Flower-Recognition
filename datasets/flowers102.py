@@ -39,8 +39,20 @@ class Flowers102(BaseDataset):
         self.idx = torch.tensor(self.idx.astype(int)).squeeze(0)
         self.idx = torch.sort(self.idx).values
         
-        if n_shot != -1:
+        if n_shot != -1 and split == 'train':
+            n_shots_idx = []
+            #n_shots_labels = []
             print(f"Sampled {n_shot}-shot samples from each of the classes")
+            for cls in range(1, self.num_classes + 1):
+                #label_cls = self.labels[self.labels == cls]
+                label_idx = self.idx[self.labels[self.idx] == cls]
+                sampled_idx = np.random.choice(np.arange(len(label_idx)), size=n_shot, replace=False)
+                #label_cls = label_cls[sampled_idx]
+                label_idx = label_idx[sampled_idx]
+                n_shots_idx.append(label_idx)
+                #n_shots_labels.append(label_cls)
+            self.idx = torch.stack(n_shots_idx).flatten(0)
+            #self.labels = torch.stack(n_shots_labels).flatten(0)
             
             
         self.images = glob(self.dataset_path + "/jpg" + "/*.jpg")
