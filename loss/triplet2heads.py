@@ -27,7 +27,7 @@ class Triplet2Heads(BaseLoss):
     def forward(self, output, labels):
         # Output = (logits, embedding)
         # Scale the loss
-        cls_loss = self.cross_entropy(output[0], labels) / 10
+        cls_loss = self.cross_entropy(output[0], labels)
         hard_pairs = self.miner(output[1], labels)
         triplet_loss = self.triplet_loss(output[1], labels, hard_pairs)
         return cls_loss + triplet_loss
