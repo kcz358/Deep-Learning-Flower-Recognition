@@ -16,10 +16,12 @@ class ViT(BaseModel):
     def __init__(self,
                  model_name: str,
                  num_classes: int,
+                 dropout_rate: int,
                  weights: str = None,
-                 transformation=default_transformation):
+                 transformation=default_transformation,
+                 ):
         super().__init__(model_name)
-        self.encoder = models.vit_b_16(weights = weights, progress = True)
+        self.encoder = models.vit_b_16(weights = weights, progress = True, dropout = dropout_rate)
         self.encoder.heads[0] = nn.Linear(self.encoder.heads[0].in_features, num_classes) # originally (head): Linear(in_features=768, out_features=1000, bias=True)
         self.transformation = transformation
         print(self.encoder)

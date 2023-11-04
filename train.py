@@ -13,10 +13,10 @@ from torch.utils.tensorboard import SummaryWriter
 from datasets import flowers102
 from models import resnet50
 from utils import build_from_config
-
+from utils.earlystop import EarlyStopper
 #import warnings
 #warnings.filterwarnings('ignore')
-EPOCHS = 5
+EPOCHS = 50
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="A script that takes dataset path, model saving path, and tensorboard log path as arguments.")
@@ -104,8 +104,6 @@ def test(epoch, test_dataloader, writer):
     return test_losses.mean(), test_accuracies.mean()
         
         
-    
-
 if __name__ == '__main__':
     args = parse_arguments()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -126,13 +124,13 @@ if __name__ == '__main__':
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d-%H:%M:%S").replace("-", "_").replace(":", "-")
     writer = SummaryWriter(log_dir=args.tensorboard_log_path + "/{}_{}_{}".format(model.name, train_dataset.name, formatted_time))
-    
+    es = EarlyStopper(patience = 10) # FIXME just for observe stuff
     for epoch in range(1,EPOCHS+1):
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
         
-        if(epoch % 5 == 0):
-            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
+        if es.early_stop(test_losses):
+            print(f"Early stop triggered at Epoth [{epoch}/{EPOCHS}]", flush = True)
             state_dict = {
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
@@ -140,5 +138,16 @@ if __name__ == '__main__':
                 'Test Acc' : test_accuracies
             }
             torch.save(state_dict, args.model_saving_path + f"/{epoch}_{model.name}.pth.tar")
+            break
+        elif(epoch % 5 == 0):
+            print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}", flush = True)
+            state_dict = {
+                'epoch' : epoch,
+                'state_dict' : model.state_dict(),
+                'Val Acc' : val_accuracies,
+                'Test Acc' : test_accuracies
+            }
+            torch.save(state_dict, args.model_saving_path + f"/{epoch}_{model.name}.pth.tar")
+
     
     writer.close()

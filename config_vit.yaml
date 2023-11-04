@@ -1,22 +1,23 @@
 model :
   - model_name: vit 
+    weights : "IMAGENET1K_V1" # DEFAULT
     num_classes : 102
-    weights : DEFAULT
+    dropout_rate: 0 # do not change yet
 
 dataset : 
   - dataset_name : flowers102
-    dataset_path : ./flowers_102
+    dataset_path : ../flowers_102
 
 optimizer :
   - opt_name : adam
     lr : 0.0005
-    warmup : 650
+    
   
 loss : 
   - loss_name : crossentropy
 
 scheduler :
   - scheduler_name : steplr
-    gamma : 0.9
-    step_size : 2
+    gamma : 0.15
+    step_size : 10
 
