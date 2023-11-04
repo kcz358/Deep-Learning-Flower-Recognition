@@ -1,12 +1,12 @@
 model :
-  - model_name: vit 
+  - model_name: resnet50 
     num_classes : 102
-    weights : "IMAGENET1K_V1" # DEFAULT
-    dropout_rate: 0 # do not change yet
+    weights : DEFAULT
+    transformation : resnet50_standard_augmentation
 
 dataset : 
   - dataset_name : flowers102
-    dataset_path : ../flowers_102
+    dataset_path : ./flowers_102
 
 optimizer :
   - opt_name : adam
@@ -18,10 +18,10 @@ loss :
 
 scheduler :
   - scheduler_name : steplr
-    gamma : 0.15
+    gamma : 0.9
     step_size : 10
 
 training :
   - patience : 10
-    epochs : 5
-    mixUp : true
+    epochs : 50
+    mixUp : false

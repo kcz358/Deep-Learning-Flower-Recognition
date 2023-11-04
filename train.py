@@ -12,6 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from utils import build_from_config
 from utils.earlystop import EarlyStopper
+from utils.mixup import gen_collate
 #import warnings
 #warnings.filterwarnings('ignore')
 
@@ -126,11 +127,15 @@ if __name__ == '__main__':
     model.to(device)
 
     #optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=1e-4)
-    
-    train_dataloader = DataLoader(train_dataset, batch_size=64)
+
+    if config['training'][0]['mixUp']:
+        collate_fn = gen_collate(config['model'][0]['num_classes'])
+        train_dataloader = DataLoader(train_dataset, batch_size=64, collate_fn=collate_fn)
+    else:
+        train_dataloader = DataLoader(train_dataset, batch_size=64)
+
     val_dataloader = DataLoader(valid_dataset, batch_size=64)
     test_dataloader = DataLoader(test_dataset, batch_size=64)
-    
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d-%H:%M:%S").replace("-", "_").replace(":", "-")
     writer = SummaryWriter(log_dir=args.tensorboard_log_path + "/{}_{}_{}".format(model.name, train_dataset.name, formatted_time))
