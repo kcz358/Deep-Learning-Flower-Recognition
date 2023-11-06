@@ -111,7 +111,10 @@ class DeformableConv2d(nn.Module):
                                       bias=bias)
         
         self.weight = nn.Parameter(regular_conv.weight.data)
-        self.bias = nn.Parameter(regular_conv.bias.data)
+        if bias:
+            self.bias = nn.Parameter(regular_conv.bias.data)
+        else:
+            self.bias = None
         del regular_conv
 
     def forward(self, x):
