@@ -4,6 +4,7 @@ import importlib
 import torch.nn as nn
 AVAILABLE_MODELS = {
     'resnet50' : 'ResNet50',
+    'resnet50_deform' : 'ResNet50_DF',
     'vit': 'ViT'
 }
 
