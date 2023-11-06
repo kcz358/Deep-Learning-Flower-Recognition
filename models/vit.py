@@ -25,6 +25,7 @@ class ViT(BaseModel):
         self.encoder.heads[0] = nn.Linear(self.encoder.heads[0].in_features, num_classes) # originally (head): Linear(in_features=768, out_features=1000, bias=True)
         self.transformation = transformation
         print(self.encoder)
+        print(f"transformation: {self.transformation}")
 
     def forward(self, x):
         return self.encoder(x), None # no feature extraction yet

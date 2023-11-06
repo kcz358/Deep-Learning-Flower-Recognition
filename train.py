@@ -155,8 +155,8 @@ if __name__ == '__main__':
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
         
         config_expanded = config
-        print(f"config: {config}")
-        print(f"hack: expand generator: {type(config_expanded['optimizer'][0]['param_groups'])}")
+        # print(f"config: {config}")
+        # print(f"hack: expand generator: {type(config_expanded['optimizer'][0]['param_groups'])}")
         config_expanded['optimizer'][0]['param_groups'] = list(config_expanded['optimizer'][0]['param_groups']) # expand generator, as generator cannot be saved by pickle
 
         state_dict = {
@@ -166,8 +166,6 @@ if __name__ == '__main__':
                 'Test Acc' : test_accuracies,
                 'training_config' : config_expanded
             }
-
-
         
         if(epoch % 5 == 0):
             # print(f"state dict: {state_dict}, {type(state_dict)}")

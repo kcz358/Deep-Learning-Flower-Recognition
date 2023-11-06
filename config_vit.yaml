@@ -3,6 +3,7 @@ model :
     num_classes : 102
     weights : "IMAGENET1K_V1" # DEFAULT
     dropout_rate: 0 # do not change yet
+    transformation: random_augmentation
 
 dataset : 
   - dataset_name : flowers102
@@ -10,15 +11,14 @@ dataset :
 
 optimizer :
   - opt_name : adam
-    lr : 0.0005
-    warmup : 650
-  
+    lr : 0.00002
+
 loss : 
   - loss_name : crossentropy
 
 scheduler :
   - scheduler_name : steplr
-    gamma : 0.15
+    gamma : 0.5
     step_size : 10
 
 training :
