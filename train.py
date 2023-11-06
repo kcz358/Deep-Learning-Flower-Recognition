@@ -48,6 +48,8 @@ def train(epoch, train_dataloader, val_dataloader, writer):
         train_losses.append(loss.item())
         
         pred = torch.argmax(output[0], dim=1)
+        if config['training'][0]['mixUp']:
+            labels = torch.argmax(labels, dim=1)
         acc = (pred == labels).sum() / len(labels)
         #import pdb; pdb.set_trace()
         train_accuracies.append(acc)
