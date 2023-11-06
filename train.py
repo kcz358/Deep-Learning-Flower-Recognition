@@ -147,8 +147,8 @@ if __name__ == '__main__':
     
     continue_ckpt = config['training'][0].get('continue_ckpt', None)
     if continue_ckpt is not None:
-        ckpt = torch.load(continue_ckpt)
-        model.load_state_dict(ckpt['state_dict'])
+        ckpt = torch.load(continue_ckpt, map_location=device)
+        model.load_state_dict(ckpt['state_dict'], strict=False)
         
     for epoch in range(1,EPOCHS+1):
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
