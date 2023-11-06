@@ -23,5 +23,5 @@ scheduler :
 
 training :
   - patience : 10
-    epochs : 5
-    mixUp : true
+    epochs : 50
+    mixUp : false

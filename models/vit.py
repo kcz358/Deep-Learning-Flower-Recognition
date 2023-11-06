@@ -27,7 +27,7 @@ class ViT(BaseModel):
         print(self.encoder)
 
     def forward(self, x):
-        return self.encoder(x)
+        return self.encoder(x), None # no feature extraction yet
 
     def to(self, device):
         self.encoder.to(device)

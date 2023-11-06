@@ -152,15 +152,23 @@ if __name__ == '__main__':
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
         
+        config_expanded = config
+        print(f"config: {config}")
+        print(f"hack: expand generator: {type(config_expanded['optimizer'][0]['param_groups'])}")
+        config_expanded['optimizer'][0]['param_groups'] = list(config_expanded['optimizer'][0]['param_groups']) # expand generator, as generator cannot be saved by pickle
+
         state_dict = {
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
                 'Val Acc' : val_accuracies,
                 'Test Acc' : test_accuracies,
-                'training_config' : config
+                'training_config' : config_expanded
             }
+
+
         
         if(epoch % 5 == 0):
+            # print(f"state dict: {state_dict}, {type(state_dict)}")
             print(f"Epoch [{epoch}/{EPOCHS}] : Valid Acc {val_accuracies:.4f}, Test Acc {test_accuracies:.4f}")
             torch.save(state_dict, args.model_saving_path + f"/latest_{model.name}.pth.tar")
         
