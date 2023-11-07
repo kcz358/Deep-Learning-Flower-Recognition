@@ -50,7 +50,7 @@ class ResNet50(BaseModel):
             layers[idx] = l
             
 
-
+        self.default_transformation = default_transformation
         self.encoder = nn.Sequential(*layers)
         self.pooling = load_pooling(pool_name=pooling)
         self.embedding_size = 2048

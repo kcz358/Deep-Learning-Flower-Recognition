@@ -86,7 +86,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
     scheduler.step()
     return train_losses.mean(), train_accuracies.mean(), val_losses.mean(), val_accuracies.mean()
 
-def test(epoch, test_dataloader, writer):
+def test(epoch, test_dataloader, writer=None):
     model.eval()
     test_losses = []
     test_accuracies = []
@@ -106,8 +106,9 @@ def test(epoch, test_dataloader, writer):
     
     test_losses = torch.tensor(test_losses, dtype=torch.float32)
     test_accuracies = torch.tensor(test_accuracies, dtype=torch.float32)
-    writer.add_scalar("Loss/test",test_losses.mean(), epoch)
-    writer.add_scalar("Accuracy/test", test_accuracies.mean(), epoch)
+    if writer is not None:
+        writer.add_scalar("Loss/test",test_losses.mean(), epoch)
+        writer.add_scalar("Accuracy/test", test_accuracies.mean(), epoch)
     
     return test_losses.mean(), test_accuracies.mean()
         

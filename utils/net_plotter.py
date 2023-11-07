@@ -68,9 +68,9 @@ def get_normalized_state_rand_direction(states):
         d2.data = d2 * (w_norm/(d_norm2+1e-10))
     return random_direction1, random_direction2
 
-def plot_3D(x_l, x_h, y_l, y_h, model, test_dataloader, criterion, device):
-    x = np.arange(x_l, x_h, step=(x_h - x_l) / 10)
-    y = np.arange(y_l, y_h, step=(y_h - y_l) / 10)
+def plot_3D(x_l, x_h, y_l, y_h, model, test_dataloader, criterion, device, steps=10):
+    x = np.arange(x_l, x_h, step=(x_h - x_l) / steps)
+    y = np.arange(y_l, y_h, step=(y_h - y_l) / steps)
     #alpha, beta = torch.meshgrid(torch.tensor(x),torch.tensor(y))
     model.eval()
     weight = get_weights(model)
@@ -97,6 +97,7 @@ def plot_3D(x_l, x_h, y_l, y_h, model, test_dataloader, criterion, device):
                     image = image.to(device)
                     label = label.to(device)
                     losses[a][b] += criterion(model(image), label).item()
+                break
             losses[a][b] /= len(test_dataloader)
             print(f"Loss at ({a}, {b}) is {losses[a][b]}")
         
@@ -105,3 +106,7 @@ def plot_3D(x_l, x_h, y_l, y_h, model, test_dataloader, criterion, device):
     surf = ax.plot_surface(x, y, losses.numpy(), cmap=cm.coolwarm,
                        linewidth=0, antialiased=False)
     fig.savefig("loss_cur.jpg")
+    fig, ax = plt.subplots()
+    CS = ax.contour(x, y, losses.numpy())
+    #ax.clabel(CS, inline=True, fontsize=10)
+    fig.savefig("loss_contour.jpg")
