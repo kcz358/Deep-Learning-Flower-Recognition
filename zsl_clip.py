@@ -152,3 +152,4 @@ if __name__ == "__main__":
         
     test_accuracies = correct / len(test_dataset)
     print(f"Zero Shot Clip Test accuracies {test_accuracies}")
+    # Score  0.6623841524124146
