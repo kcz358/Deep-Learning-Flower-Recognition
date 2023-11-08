@@ -92,21 +92,21 @@ def plot_3D(x_l, x_h, y_l, y_h, model, test_dataloader, criterion, device, steps
             print(f'b = {b}', end=" ")
             print(f'alpha = {x[a]}, beta = {y[b]}')
             vector_to_parameters(tau_2d(x[a], y[b], weight), model.parameters())
-            for iterations, (image, label) in enumerate(tqdm(test_dataloader)):
+            for iterations, (image, label) in enumerate(test_dataloader, 1):
                 with torch.no_grad():
                     image = image.to(device)
                     label = label.to(device)
                     losses[a][b] += criterion(model(image), label).item()
                 break
-            losses[a][b] /= len(test_dataloader)
+            losses[a][b] /= iterations
             print(f"Loss at ({a}, {b}) is {losses[a][b]}")
         
-    
+    X,Y = np.meshgrid(x, y)
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    surf = ax.plot_surface(x, y, losses.numpy(), cmap=cm.coolwarm,
+    surf = ax.plot_surface(X, Y, losses.numpy(), cmap=cm.coolwarm,
                        linewidth=0, antialiased=False)
     fig.savefig("loss_cur.jpg")
     fig, ax = plt.subplots()
-    CS = ax.contour(x, y, losses.numpy())
+    CS = ax.contour(X, Y, losses.numpy())
     #ax.clabel(CS, inline=True, fontsize=10)
     fig.savefig("loss_contour.jpg")
