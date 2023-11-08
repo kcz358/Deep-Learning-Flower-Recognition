@@ -100,8 +100,8 @@ if __name__ == "__main__":
         results[name] = {}
         results[name]['Test Acc'] = test_accuracies
         results[name]['recalls'] = test_recalls
-        results[name]['match_index'] = predictions
-        results[name]['gt'] = q_labels
+        results[name]['match_index'] = list(predictions)
+        results[name]['gt'] = list(q_labels)
     with open("./eval_results.json", "w") as f:
         json.dump(results, f, indent=4)
         
