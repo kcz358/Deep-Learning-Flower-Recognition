@@ -52,7 +52,7 @@ def train(epoch, train_dataloader, val_dataloader, writer):
     scheduler.step()
     return train_losses.mean()
 
-def test(epoch, test_dataset, train_dataset, writer):
+def test(epoch, test_dataset, train_dataset, writer=None):
     db_features = encode_database(train_dataset, model, model.embedding_size, device)
     q_features = encode_database(test_dataset, model, model.embedding_size, device)
     
@@ -66,12 +66,13 @@ def test(epoch, test_dataset, train_dataset, writer):
     q_labels = np.array(q_labels, dtype=int)
     
     # recalls a dict (k, recall@k)
-    recalls = evaluate(db_features, q_features, db_labels, q_labels)
+    recalls, predictions = evaluate(db_features, q_features, db_labels, q_labels)
     
-    for i,n in recalls.items():
-        #print("====> Recall@{}: {:.4f}".format(i, n))     
-        writer.add_scalar('Val/Recall@' + str(i), n, epoch)
-    return recalls
+    if writer is not None:
+        for i,n in recalls.items():
+            #print("====> Recall@{}: {:.4f}".format(i, n))     
+            writer.add_scalar('Val/Recall@' + str(i), n, epoch)
+    return recalls, predictions, q_labels
         
 def is_best_recall(best_score, recalls):
     if recalls[1] > best_score[1]:
@@ -138,7 +139,7 @@ if __name__ == '__main__':
             
         print(f"Epoch {epoch} ===>")
         train_losses = train(epoch, train_dataloader, val_dataloader, writer)
-        test_recalls = test(epoch, test_dataset, train_dataset, writer)
+        test_recalls, predictions, _ = test(epoch, test_dataset, train_dataset, writer)
         
         state_dict = {
                 'epoch' : epoch,

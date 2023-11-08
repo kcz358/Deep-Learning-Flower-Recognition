@@ -38,10 +38,10 @@ if __name__ == "__main__":
         print("No config specify in the ckpt")
         model, _, _, criterion, train_dataset, valid_dataset, test_dataset = build_from_config(config)
     
-    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=False)
+    train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=False)
     model.to(device)
     import time
     start = time.perf_counter()
-    plot_3D(-1, 1, -1, 1, model, train_dataloader, criterion, device)
+    plot_3D(-1, 1, -1, 1, model, train_dataloader, criterion, device, steps=30)
     end = time.perf_counter()
     print(f"Time elapsed : {end - start}")
