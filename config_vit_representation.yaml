@@ -4,7 +4,8 @@ model :
     weights : "IMAGENET1K_V1" # DEFAULT
     dropout_rate: 0 # do not change yet
     transformation: vit_default_transformation
-    feature_extraction: false
+    feature_extraction: true
+
 dataset : 
   - dataset_name : flowers102
     dataset_path : ../flowers_102
@@ -15,7 +16,7 @@ optimizer :
     sam : true
 
 loss : 
-  - loss_name : crossentropy
+  - loss_name : multisimilarityloss
 
 scheduler :
   - scheduler_name : steplr
@@ -23,7 +24,7 @@ scheduler :
     step_size : 10
 
 training :
-  - patience : 10
-    epochs : 100
+  - patience : 3
+    epochs : 15
     mixUp : false
     continue_ckpt : '/home/UG/c200205/randaug_sam/output_model/model_best.pth.tar'

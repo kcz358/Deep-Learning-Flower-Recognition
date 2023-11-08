@@ -21,6 +21,7 @@ class AdamOpt(BaseOptimizer):
         self.weight_decay = weight_decay
         self.betas=betas
         self.sam = sam
+        print(f"SAM status: {self.sam}")
         if self.sam:
             self.optimizer = SAM(self.optimizer.param_groups, self.optimizer, adaptive=True)
         

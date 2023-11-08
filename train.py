@@ -147,6 +147,7 @@ if __name__ == '__main__':
     
     continue_ckpt = config['training'][0].get('continue_ckpt', None)
     if continue_ckpt is not None:
+        print("Loading model for continue")
         ckpt = torch.load(continue_ckpt, map_location=device)
         model.load_state_dict(ckpt['state_dict'], strict=False)
         
