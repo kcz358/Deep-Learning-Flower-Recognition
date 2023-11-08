@@ -20,7 +20,7 @@ def encode_database(dataset : Dataset, model : nn.Module, embedding_size : int, 
     """    
     
     features = torch.zeros(len(dataset), embedding_size, dtype=torch.float32)
-    dataloader = DataLoader(dataset, batch_size=32)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
     model.eval()
     
     for iterations, (img, labels) in enumerate(dataloader, 1):
@@ -60,4 +60,4 @@ def evaluate(db_features : np.array, q_features : np.array, db_labels : np.array
     for i,n in enumerate(n_values):
         recalls[n] = recall_at_n[i]
         print("====> Recall@{}: {:.4f}".format(n, recall_at_n[i]))     
-    return recalls
+    return recalls, predictions

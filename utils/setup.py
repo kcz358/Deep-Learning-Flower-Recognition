@@ -28,6 +28,8 @@ def build_from_config(config):
     
     dataset_config['transform'] = model.transformation
     train_dataset = build_dataset_from_config(dataset_config, split='train')
+    # For valid and test, we don't do aug or mixup
+    dataset_config['transform'] = model.default_transformation
     valid_dataset = build_dataset_from_config(dataset_config, split='valid')
     test_dataset = build_dataset_from_config(dataset_config, split='test')
     
