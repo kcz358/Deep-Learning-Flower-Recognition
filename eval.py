@@ -22,6 +22,7 @@ def acc_test(epoch, test_dataloader, writer=None):
     model.eval()
     test_losses = []
     test_accuracies = []
+    predictions = []
     for iterations, (images, labels) in enumerate(test_dataloader, 1):
         images = images.to(device)
         labels = labels.to(device)
@@ -33,6 +34,7 @@ def acc_test(epoch, test_dataloader, writer=None):
         test_losses.append(loss.item())
         
         pred = torch.argmax(output[0], dim=1)
+        predictions += pred.tolist()
         acc = (pred == labels).sum() / len(labels)
         test_accuracies.append(acc)
         if iterations % 10 == 0:
@@ -44,7 +46,7 @@ def acc_test(epoch, test_dataloader, writer=None):
         writer.add_scalar("Loss/test",test_losses.mean(), epoch)
         writer.add_scalar("Accuracy/test", test_accuracies.mean(), epoch)
     
-    return test_losses.mean(), test_accuracies.mean()
+    return test_losses.mean(), test_accuracies.mean(), predictions
 
 def retrieval_test(epoch, test_dataset, train_dataset, writer=None):
     db_features = encode_database(train_dataset, model, model.embedding_size, device)
@@ -93,15 +95,16 @@ if __name__ == "__main__":
         
         test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
         
-        test_losses, test_accuracies = acc_test(0, test_dataloader, None)
+        test_losses, test_accuracies, acc_predictions = acc_test(0, test_dataloader, None)
         test_recalls, predictions, q_labels = retrieval_test(0, test_dataset, train_dataset, None)
         print(f"Acc : {test_accuracies}")
         name = files.split('/')[-1]
         results[name] = {}
-        results[name]['Test Acc'] = test_accuracies
+        results[name]['Test Acc'] = test_accuracies.item()
         results[name]['recalls'] = test_recalls
-        results[name]['match_index'] = list(predictions)
-        results[name]['gt'] = list(q_labels)
+        results[name]['match_index'] = predictions.astype(int).tolist()
+        results[name]['predictions'] = acc_predictions
+        results[name]['gt'] = q_labels.astype(int).tolist()
     with open("./eval_results.json", "w") as f:
         json.dump(results, f, indent=4)
         
