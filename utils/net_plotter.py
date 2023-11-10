@@ -97,6 +97,9 @@ def plot_3D(x_l, x_h, y_l, y_h, model, test_dataloader, criterion, device, steps
                     image = image.to(device)
                     label = label.to(device)
                     losses[a][b] += criterion(model(image), label).item()
+                    del image, label
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
                 break
             losses[a][b] /= iterations
             print(f"Loss at ({a}, {b}) is {losses[a][b]}")
