@@ -29,7 +29,7 @@ python plot_3D.py -c=config.yaml
 
 Example results :
 
-![alt text](./visualization_plot/loss_cur_vit.jpg)
+![ViT with mixup loss landscape](./visualization_plot/loss_cur_vit.jpg)
 
 
 ## Few-shot-learning
