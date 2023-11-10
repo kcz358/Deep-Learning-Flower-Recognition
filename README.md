@@ -20,6 +20,7 @@ python representation_learning.py -c=./config.yaml\
 by replacing the `train.py` to `representation_learning.py`.
 
 ## Visualization
+We follow [Visualizing the Loss Landscape of Neural Nets](https://arxiv.org/abs/1712.09913) to visualize the loss landscape
 
 You can visualize the loss landscape by including your pretrained checkpoint into the config and run:
 ```
@@ -27,5 +28,21 @@ python plot_3D.py -c=config.yaml
 ```
 
 Example results :
-![alt text]([https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true](https://github.com/kcz358/Deep-Learning-Flower-Recognition/blob/main/visualization_plot/loss_contour_vit.jpg)https://github.com/kcz358/Deep-Learning-Flower-Recognition/blob/main/visualization_plot/loss_contour_vit.jpg)
+
+![alt text](./visualization_plot/loss_cur_vit.jpg)
+
+
+## Few-shot-learning
+You can do few shot learning by setting the n-shot in your config file. You can also try zero-shot learning by simply running:
+```
+python zsl_clip.py -c=config.yaml
+```
+The config file is just used for loading the dataset
+
+
+## Evaluation
+You can use `eval.py` to do testing on both recognition and retrieval tasks on all of your trained checkpoints by running:
+```
+python eval.py -c=config.yaml -p=./checkpoints
+```
 
