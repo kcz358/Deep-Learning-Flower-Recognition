@@ -25,6 +25,7 @@ class ViT(BaseModel):
         self.encoder = models.vit_b_16(weights = weights, progress = True, dropout = dropout_rate)
         self.encoder.heads[0] = nn.Linear(self.encoder.heads[0].in_features, num_classes) # originally (head): Linear(in_features=768, out_features=1000, bias=True)
         self.transformation = transformation
+        self.default_transformation = default_transformation
         self.feature_extraction = feature_extraction
         self.embedding_size = 768
         self.cnt = 0 # aux variable

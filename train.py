@@ -1,4 +1,5 @@
 import argparse
+import copy
 import datetime
 import yaml
 
@@ -122,6 +123,8 @@ if __name__ == '__main__':
     
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
+    # Save the init training config
+    training_config = copy.deepcopy(config)
     EPOCHS = config['training'][0]['epochs']
     patience = config['training'][0]['patience']
     
@@ -156,17 +159,18 @@ if __name__ == '__main__':
         train_losses, train_accuracies, val_losses, val_accuracies = train(epoch, train_dataloader, val_dataloader, writer)
         test_losses, test_accuracies = test(epoch, test_dataloader, writer)
         
-        config_expanded = config
+        # Save the init config is enough, no need to save param_groups
+        #config_expanded = config
         # print(f"config: {config}")
         # print(f"hack: expand generator: {type(config_expanded['optimizer'][0]['param_groups'])}")
-        config_expanded['optimizer'][0]['param_groups'] = list(config_expanded['optimizer'][0]['param_groups']) # expand generator, as generator cannot be saved by pickle
+        #config_expanded['optimizer'][0]['param_groups'] = list(config_expanded['optimizer'][0]['param_groups']) # expand generator, as generator cannot be saved by pickle
 
         state_dict = {
                 'epoch' : epoch,
                 'state_dict' : model.state_dict(),
                 'Val Acc' : val_accuracies,
                 'Test Acc' : test_accuracies,
-                'training_config' : config_expanded
+                'training_config' : training_config
             }
         
         if(epoch % 5 == 0):
