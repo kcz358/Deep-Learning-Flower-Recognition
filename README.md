@@ -33,7 +33,9 @@ Example results :
 
 
 ## Few-shot-learning
-You can do few shot learning by setting the n-shot in your config file. You can also try zero-shot learning by simply running:
+You can do few shot learning by setting the n-shot in your config file. 
+
+For **zero-shot classification** You can also try zero-shot learning by simply running:
 ```
 python zsl_clip.py -c=config.yaml
 ```
